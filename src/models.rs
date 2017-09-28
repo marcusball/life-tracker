@@ -1,5 +1,5 @@
-use chrono::datetime::DateTime;
-use chrono::offset::utc::UTC;
+use chrono::DateTime;
+use chrono::offset::Utc;
 
 #[derive(Queryable)]
 pub struct Counter {
@@ -13,5 +13,5 @@ pub struct CounterEvent {
     pub id: i32,
     pub cid: i32,
     pub quantity: i32,
-    pub timestamp: DateTime<UTC>,
+    pub timestamp: DateTime<Utc>,
 }
