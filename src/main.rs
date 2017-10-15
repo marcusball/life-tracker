@@ -16,14 +16,20 @@ extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rocket;
 extern crate rocket_contrib;
+extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
 
 pub mod schema;
 pub mod models;
 mod database;
 
 use database::DbConn;
+use models::Counter;
+
+use diesel::prelude::*;
+use rocket_contrib::Json;
 
 #[get("/")]
 fn hello(conn: DbConn) -> &'static str {
@@ -32,9 +38,18 @@ fn hello(conn: DbConn) -> &'static str {
     "Suh, dude"
 }
 
+#[get("/counters")]
+fn counters(conn: DbConn) -> Json<Vec<Counter>> {
+    use schema::counters::dsl::*;
+
+    let conn = conn.get();
+
+    Json(counters.load::<Counter>(conn).unwrap())
+}
+
 fn main() {
     rocket::ignite()
         .manage(database::init_pool())
-        .mount("/", routes![hello])
+        .mount("/", routes![hello, counters])
         .launch();
 }
