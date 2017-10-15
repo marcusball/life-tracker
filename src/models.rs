@@ -10,7 +10,7 @@ pub struct Counter {
     pub unit: String,
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
 pub struct CounterEvent {
     pub id: i32,
     pub cid: i32,

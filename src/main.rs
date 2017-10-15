@@ -26,7 +26,7 @@ pub mod models;
 mod database;
 
 use database::DbConn;
-use models::Counter;
+use models::*;
 
 use diesel::prelude::*;
 use rocket_contrib::Json;
@@ -48,21 +48,31 @@ fn counters(conn: DbConn) -> Json<Vec<Counter>> {
     Json(counters.load::<Counter>(conn).unwrap())
 }
 
-#[get("/counter/<counter>")]
-fn counter(counter: String, conn: DbConn) -> Result<Json<Counter>, NotFound<String>> {
+#[get("/counter/<counter_url>")]
+fn counter(counter_url: String, conn: DbConn) -> Result<Json<Vec<CounterEvent>>, NotFound<String>> {
     use schema::counters::dsl::*;
+    use schema::counter_events::dsl::*;
 
-    counters
-        .filter(url.eq(&counter))
+    // Get the Counter for which this endpoint will be returning event data, if one exists
+    let counter = counters
+        .filter(url.eq(&counter_url))
         .first::<Counter>(conn.get())
-        .map(|c| Json(c))
         .map_err(|_| {
             warn!(
                 "lol someone thought that \"{}\" was a valid counter, what a dumbass",
-                counter
+                counter_url
             );
-            NotFound(format!("Counter \"{}\" does not exist!", counter))
-        })
+            NotFound(format!("Counter \"{}\" does not exist!", counter_url))
+        })?;
+
+
+    // Query the event data for this counter and return it
+    Ok(Json(
+        counter_events
+            .filter(cid.eq(&counter.id))
+            .load::<CounterEvent>(conn.get())
+            .unwrap(),
+    ))
 }
 
 fn main() {
