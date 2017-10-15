@@ -5,6 +5,7 @@ use serde::Serialize;
 #[derive(Queryable, Serialize)]
 pub struct Counter {
     pub id: i32,
+    pub url: String,
     pub name: String,
     pub unit: String,
 }
