@@ -30,6 +30,7 @@ use models::Counter;
 
 use diesel::prelude::*;
 use rocket_contrib::Json;
+use rocket::response::status::NotFound;
 
 #[get("/")]
 fn hello(conn: DbConn) -> &'static str {
@@ -47,9 +48,26 @@ fn counters(conn: DbConn) -> Json<Vec<Counter>> {
     Json(counters.load::<Counter>(conn).unwrap())
 }
 
+#[get("/counter/<counter>")]
+fn counter(counter: String, conn: DbConn) -> Result<Json<Counter>, NotFound<String>> {
+    use schema::counters::dsl::*;
+
+    counters
+        .filter(url.eq(&counter))
+        .first::<Counter>(conn.get())
+        .map(|c| Json(c))
+        .map_err(|_| {
+            warn!(
+                "lol someone thought that \"{}\" was a valid counter, what a dumbass",
+                counter
+            );
+            NotFound(format!("Counter \"{}\" does not exist!", counter))
+        })
+}
+
 fn main() {
     rocket::ignite()
         .manage(database::init_pool())
-        .mount("/", routes![hello, counters])
+        .mount("/", routes![hello, counters, counter])
         .launch();
 }
