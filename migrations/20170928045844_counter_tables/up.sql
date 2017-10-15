@@ -2,7 +2,7 @@
 
 CREATE TABLE "counters" (
   "id"   serial NOT NULL PRIMARY KEY,
-  "url"  character varying(64) NOT NULL,
+  "url"  character varying(64) NOT NULL UNIQUE,
   "name" character varying(64) NOT NULL,
   "unit" character varying(64) NOT NULL
 );
