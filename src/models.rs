@@ -1,7 +1,8 @@
 use chrono::DateTime;
 use chrono::offset::Utc;
+use serde::Serialize;
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
 pub struct Counter {
     pub id: i32,
     pub name: String,
