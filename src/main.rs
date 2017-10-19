@@ -83,7 +83,7 @@ fn static_content(file: PathBuf) -> std::io::Result<NamedFile> {
 fn main() {
     rocket::ignite()
         .manage(database::init_pool())
-        .mount("/", routes![hello, counters, counter])
+        .mount("/", routes![hello, counters, counter, static_content])
         .attach(Template::fairing())
         .launch();
 }
