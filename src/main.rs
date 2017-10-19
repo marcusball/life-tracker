@@ -28,9 +28,11 @@ mod database;
 use database::DbConn;
 use models::*;
 
+use std::path::{Path, PathBuf};
 use diesel::prelude::*;
 use rocket_contrib::Json;
 use rocket::response::status::NotFound;
+use rocket::response::NamedFile;
 
 #[get("/")]
 fn hello(conn: DbConn) -> &'static str {
@@ -73,6 +75,11 @@ fn counter(counter_url: String, conn: DbConn) -> Result<Json<Vec<CounterEvent>>,
             .load::<CounterEvent>(conn.get())
             .unwrap(),
     ))
+}
+
+#[get("/static/<file..>")]
+fn static_content(file: PathBuf) -> std::io::Result<NamedFile> {
+    NamedFile::open(Path::new("static/").join(file))
 }
 
 fn main() {
