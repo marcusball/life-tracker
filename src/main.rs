@@ -30,15 +30,13 @@ use models::*;
 
 use std::path::{Path, PathBuf};
 use diesel::prelude::*;
-use rocket_contrib::Json;
+use rocket_contrib::{Json, Template};
 use rocket::response::status::NotFound;
 use rocket::response::NamedFile;
 
 #[get("/")]
-fn hello(conn: DbConn) -> &'static str {
-    let _ = conn.get();
-
-    "Suh, dude"
+fn hello() -> Template {
+    Template::render("index", ())
 }
 
 #[get("/counters")]
@@ -86,5 +84,6 @@ fn main() {
     rocket::ignite()
         .manage(database::init_pool())
         .mount("/", routes![hello, counters, counter])
+        .attach(Template::fairing())
         .launch();
 }
