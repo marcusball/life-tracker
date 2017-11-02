@@ -9,6 +9,7 @@ use rocket_contrib::{Json, Template};
 use rocket::response::status::NotFound;
 use rocket::response::NamedFile;
 
+type StdResult<T, E> = ::std::result::Result<T, E>;
 
 #[get("/")]
 pub fn hello() -> Template {
@@ -30,6 +31,27 @@ pub fn counters(conn: DbConn) -> Template {
 }
 
 #[get("/counter/<counter_url>")]
-pub fn counter(counter_url: String, conn: DbConn) -> Result<Json<Vec<CounterEvent>>> {
-    Ok(Json(counters::counter(counter_url, conn)?))
+pub fn counter(counter_url: String, conn: DbConn) -> StdResult<Template, Result<NotFound<String>>> {
+    use schema::counters::dsl::*;
+
+    #[derive(Serialize)]
+    struct Context {
+        counter: Counter,
+        events: Vec<CounterEvent>,
+    };
+
+    // Select the requested Counter
+    let counter = counters
+        .filter(url.eq(&counter_url))
+        .first::<Counter>(conn.get())
+        .map_err(|_| {
+            Ok(NotFound("Could not find the requested counter!".to_owned()))
+        })?;
+
+    // Read its associated events
+    let events = counter.events(&conn).map_err(|e| Err(e))?;
+
+    let context = Context { counter, events };
+
+    Ok(Template::render("counter", &context))
 }
