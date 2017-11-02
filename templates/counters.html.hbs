@@ -8,14 +8,15 @@
     <body>
         <h1>COUNTERS</h1>
 
-        <div id="counters"></div>
-        <ul>
-            {{#each counters}}
-                <li>
-                    <a href="/counter/{{url}}">{{name}}</a>
-                </li>
-            {{/each}}
-        </ul>
+        <div id="counters">
+            <ul>
+                {{#each counters}}
+                    <li>
+                        <a href="/counter/{{url}}">{{name}}</a>
+                    </li>
+                {{/each}}
+            </ul>
+        </div>
     </body>
 
 </html>
