@@ -16,8 +16,17 @@ pub fn hello() -> Template {
 }
 
 #[get("/counters")]
-pub fn counters(conn: DbConn) -> Json<Vec<Counter>> {
-    Json(counters::counters(conn))
+pub fn counters(conn: DbConn) -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        counters: Vec<Counter>,
+    };
+
+    let context = Context {
+        counters: counters::counters(conn),
+    };
+
+    Template::render("counters", &context)
 }
 
 #[get("/counter/<counter_url>")]
