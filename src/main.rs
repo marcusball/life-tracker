@@ -56,6 +56,7 @@ fn main() {
                 routes::hello,
                 routes::counters,
                 routes::counter,
+                routes::counter_new_event,
                 static_content
             ],
         )

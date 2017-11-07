@@ -19,6 +19,14 @@ impl Counter {
                 Error::with_chain(e, "Unable to load events for this counter")
             })
     }
+
+    pub fn from_url<U>(counter_url: U, conn: &DbConn) -> Result<Self> where U: AsRef<str> {
+        use schema::counters::dsl::*;
+
+        Ok(counters
+            .filter(url.eq(counter_url.as_ref()))
+            .first::<Counter>(conn.get())?)
+    }
 }
 
 pub fn counters(conn: DbConn) -> Vec<Counter> {
@@ -34,9 +42,7 @@ pub fn counter(counter_url: String, conn: DbConn) -> Result<Vec<CounterEvent>> {
     use schema::counter_events::dsl::*;
 
     // Get the Counter for which this endpoint will be returning event data, if one exists
-    let counter = counters
-        .filter(url.eq(&counter_url))
-        .first::<Counter>(conn.get())
+    let counter = Counter::from_url(&counter_url, &conn)
         .map_err(|e| Error::with_chain(e, "Counter not found!"))?;
 
     counter.events(&conn)
