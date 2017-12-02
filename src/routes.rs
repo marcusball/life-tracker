@@ -19,7 +19,12 @@ pub fn hello() -> Template {
     Template::render("index", ())
 }
 
-#[get("/counters")]
+#[get("/counters", format = "application/json")]
+pub fn counters_json(conn: DbConn) -> Json<Vec<Counter>> {
+    Json(counters::counters(conn))
+}
+
+#[get("/counters", rank = 2)]
 pub fn counters(conn: DbConn) -> Template {
     #[derive(Serialize)]
     struct Context {
@@ -44,10 +49,9 @@ pub fn counter(counter_url: String, conn: DbConn) -> StdResult<Template, Result<
     };
 
     // Select the requested Counter
-    let counter = Counter::from_url(&counter_url, &conn)
-        .map_err(|_| {
-            Ok(NotFound("Could not find the requested counter!".to_owned()))
-        })?;
+    let counter = Counter::from_url(&counter_url, &conn).map_err(|_| {
+        Ok(NotFound("Could not find the requested counter!".to_owned()))
+    })?;
 
     // Read its associated events
     let events = counter.events(&conn).map_err(|e| Err(e))?;
@@ -60,17 +64,22 @@ pub fn counter(counter_url: String, conn: DbConn) -> StdResult<Template, Result<
 
 #[derive(FromForm)]
 pub struct EventForm {
-    quantity: i32
+    quantity: i32,
 }
 
-#[post("/counter/<counter_url>", data="<event>")]
-pub fn counter_new_event(counter_url: String, event: Form<EventForm>, conn: DbConn) -> StdResult<Redirect, Result<NotFound<String>>> {
-    let counter = Counter::from_url(&counter_url, &conn)
-        .map_err(|_| {
-            Ok(NotFound("Could not find the requested counter!".to_owned()))
-        })?;
+#[post("/counter/<counter_url>", data = "<event>")]
+pub fn counter_new_event(
+    counter_url: String,
+    event: Form<EventForm>,
+    conn: DbConn,
+) -> StdResult<Redirect, Result<NotFound<String>>> {
+    let counter = Counter::from_url(&counter_url, &conn).map_err(|_| {
+        Ok(NotFound("Could not find the requested counter!".to_owned()))
+    })?;
 
-    counter.add_event(event.into_inner().quantity, Utc::now(), &conn).ok();
+    counter
+        .add_event(event.into_inner().quantity, Utc::now(), &conn)
+        .ok();
 
     Ok(Redirect::to(&format!("/counter/{}", counter_url)))
 }
