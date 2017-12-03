@@ -73,6 +73,19 @@ pub fn counter_json(
     Ok(Json(context))
 }
 
+#[get("/counter/<counter_url>/events")]
+pub fn counter_events_json(
+    counter_url: String,
+    conn: DbConn,
+) -> StdResult<Json<Vec<CounterEvent>>, Result<NotFound<String>>> {
+    // Select the requested Counter
+    let counter = Counter::from_url(&counter_url, &conn).map_err(|_| {
+        Ok(NotFound("Could not find the requested counter!".to_owned()))
+    })?;
+
+    // Read its associated events
+    Ok(Json(counter.events(&conn).map_err(|e| Err(e))?))
+}
 
 #[get("/counter/<counter_url>", rank = 2)]
 pub fn counter(counter_url: String, conn: DbConn) -> StdResult<Template, Result<NotFound<String>>> {
