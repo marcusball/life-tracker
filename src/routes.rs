@@ -38,15 +38,50 @@ pub fn counters(conn: DbConn) -> Template {
     Template::render("counters", &context)
 }
 
-#[get("/counter/<counter_url>")]
-pub fn counter(counter_url: String, conn: DbConn) -> StdResult<Template, Result<NotFound<String>>> {
-    use schema::counters::dsl::*;
+#[derive(Serialize)]
+pub struct CounterResponse {
+    id: i32,
+    url: String,
+    name: String,
+    unit: String,
+    events: String,
+}
 
+impl CounterResponse {
+    fn new(counter: Counter) -> Self {
+        CounterResponse {
+            id: counter.id,
+            name: counter.name,
+            unit: counter.unit,
+            events: format!("/counter/{}/events", &counter.url),
+            url: counter.url,
+        }
+    }
+}
+
+#[get("/counter/<counter_url>", format = "application/json")]
+pub fn counter_json(
+    counter_url: String,
+    conn: DbConn,
+) -> StdResult<Json<CounterResponse>, NotFound<String>> {
+    // Select the requested Counter
+    let counter = Counter::from_url(&counter_url, &conn)
+        .map_err(|_| NotFound(r##"{"error":"not found"}"##.to_owned()))?;
+
+    let context = CounterResponse::new(counter);
+
+    Ok(Json(context))
+}
+
+
+#[get("/counter/<counter_url>", rank = 2)]
+pub fn counter(counter_url: String, conn: DbConn) -> StdResult<Template, Result<NotFound<String>>> {
     #[derive(Serialize)]
-    struct Context {
+    pub struct Context {
         counter: Counter,
         events: Vec<CounterEvent>,
-    };
+    }
+
 
     // Select the requested Counter
     let counter = Counter::from_url(&counter_url, &conn).map_err(|_| {

@@ -57,6 +57,7 @@ fn main() {
                 routes::counters,
                 routes::counters_json,
                 routes::counter,
+                routes::counter_json,
                 routes::counter_new_event,
                 static_content
             ],
