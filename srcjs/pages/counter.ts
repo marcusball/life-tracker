@@ -13,11 +13,8 @@ class Counter {
         })
             .then((response) => response.json())
             .then((json: object[]) => {
+                // Convert the `object` to a `CounterEvent` object. 
                 return json.map((obj) => Object.assign(new CounterEvent(), obj))
-            })
-            .then((events: CounterEvent[]) => {
-                console.log(events);
-                return events;
             });
     }
 }
