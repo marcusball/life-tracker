@@ -1,15 +1,15 @@
 class Counter {
-    id: number;
-    url: string;
-    name: string;
-    unit: string;
-    events: string;
+    public id: number;
+    public url: string;
+    public name: string;
+    public unit: string;
+    public events: string;
 
-    getEvents(): Promise<CounterEvent[]> {
+    public getEvents(): Promise<CounterEvent[]> {
         return fetch(this.events, {
             headers: new Headers({
-                'Accept': 'application/json'
-            })
+                Accept: 'application/json',
+            }),
         })
             .then((response) => response.json())
             .then((json: object[]) => {
@@ -20,21 +20,21 @@ class Counter {
 }
 
 class CounterEvent {
-    id: number;
-    quantity: number;
-    timestamp: string;
+    public id: number;
+    public quantity: number;
+    public timestamp: string;
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    let url = window.location.pathname;
+    const url = window.location.pathname;
 
     fetch(url, {
         headers: new Headers({
-            'Accept': 'application/json'
-        })
+            Accept: 'application/json',
+        }),
     })
         .then((response) => response.json())
         .then((json: object) => Object.assign(new Counter(), json))
         .then((counter: Counter) => counter.getEvents())
         .then((events: CounterEvent[]) => console.log(events));
-})
+});
