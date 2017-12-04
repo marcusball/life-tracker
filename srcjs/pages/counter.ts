@@ -1,5 +1,8 @@
 import * as UrlPattern from 'url-pattern';
 
+// TODO: See if this can be changed to not need a relative path
+import * as template from '../../static/templates/counter-events.html.hbs';
+
 /**
  * Represents a single Counter of events. 
  */
@@ -70,12 +73,23 @@ class CounterEvent {
     public timestamp: string;
 }
 
+function displayEvents(counterUrl: string) {
+    const loadEvents = Counter.getFromUrl(counterUrl)
+        .then((counter: Counter) => {
+            counter.getEvents()
+                .then((events: CounterEvent[]) => {
+                    const html = template({ counter, events });
+
+                    const eventsContainer = document.getElementById('events');
+                    if (!eventsContainer) { return; }
+                    eventsContainer.insertAdjacentHTML('beforeend', html);
+                });
+        });
+
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
     const url = window.location.pathname;
 
-    Counter.getFromUrl(url)
-        .then((counter: Counter) => counter.getEvents())
-        .then((events: CounterEvent[]) => {
-            console.log(events);
-        });
+    displayEvents(url);
 });
