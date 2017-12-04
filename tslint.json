@@ -1,0 +1,22 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {
+        "prefer-const": true,
+        "allow-return-shorthand": true,
+        "jsdoc-format": true,
+        "quotemark": [true, "single"]
+    },
+    "rules": {
+        "prefer-const": true,
+        "allow-return-shorthand": true,
+        "completed-docs": true,
+        "interface-name": true,
+        "jsdoc-format": true,
+        "semicolon": [true, "always"],
+        "quotemark": [true, "single"]
+    },
+    "rulesDirectory": []
+}
