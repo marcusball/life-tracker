@@ -5,14 +5,14 @@
     ],
     "jsRules": {
         "prefer-const": true,
-        "allow-return-shorthand": true,
+        "arrow-return-shorthand": true,
         "jsdoc-format": true,
         "quotemark": [true, "single"],
         "no-console": false
     },
     "rules": {
         "prefer-const": true,
-        "allow-return-shorthand": true,
+        "arrow-return-shorthand": true,
         "completed-docs": true,
         "interface-name": true,
         "jsdoc-format": true,
@@ -20,7 +20,8 @@
         "quotemark": [true, "single"],
         "no-console": false,
         "max-classes-per-file": false,
-        "no-unused-variable": true
+        "no-unused-variable": true,
+        "no-trailing-whitespace": [true, "ignore-comments"]
     },
     "rulesDirectory": []
 }

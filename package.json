@@ -2,12 +2,13 @@
   "name": "life-tracker",
   "version": "1.0.0",
   "description": "",
-  "dependencies": {},
+  "dependencies": {
+    "url-pattern": "^1.0.3"
+  },
   "devDependencies": {
     "glob": "^7.1.2",
     "source-map-loader": "^0.2.3",
     "ts-loader": "^3.2.0",
-    "tsify": "^3.0.3",
     "typescript": "^2.6.2"
   },
   "scripts": {
