@@ -73,23 +73,76 @@ class CounterEvent {
     public timestamp: string;
 }
 
-function displayEvents(counterUrl: string) {
-    const loadEvents = Counter.getFromUrl(counterUrl)
-        .then((counter: Counter) => {
-            counter.getEvents()
-                .then((events: CounterEvent[]) => {
-                    const html = template({ counter, events });
+/**
+ * Load a Counter and its events, and then displays them on the page. 
+ * @param counterUrl The API url form querying a counter; ex: '/counter/my-counter'
+ */
+function loadEvents(counterUrl: string): Promise<any> {
+    return Counter.getFromUrl(counterUrl)
+        .then(displayEvents);
+}
 
-                    const eventsContainer = document.getElementById('events');
-                    if (!eventsContainer) { return; }
-                    eventsContainer.insertAdjacentHTML('beforeend', html);
-                });
+/**
+ * Load events from a counter, then display them in a table. 
+ * @param counter The Counter which should have its events displayed. 
+ */
+function displayEvents(counter: Counter): Promise<any> {
+    return counter.getEvents()
+        .then((events: CounterEvent[]) => {
+            const html = template({ counter, events });
+
+            const eventsContainer = document.getElementById('events');
+            if (!eventsContainer) { return; }
+
+            // Murder all of this element's innocent children
+            eventsContainer.innerHTML = '';
+
+            // Fill the container with some brand new content
+            eventsContainer.insertAdjacentHTML('beforeend', html);
         });
+}
 
+function onNewEventSubmit(event: Event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target as HTMLFormElement);
+
+    // Because Rocket currently does not support `multipart/form-data`
+    const urlData = formDataToUrlParams(formData);
+
+    fetch(window.location.pathname + '/events', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: urlData,
+    })
+        .then((res) => res.json())
+        .then((json) => { console.log(json); })
+        // Refresh the events list
+        .then(() => loadEvents(window.location.pathname));
+}
+
+/**
+ * Convert a FormData instance into a URLSearchParams object by copying over keys and values. 
+ * @param formData 
+ */
+function formDataToUrlParams(formData: FormData): URLSearchParams {
+    // Reduce the form's key-value pairs into a URLSearchParams object
+    return [...formData.entries()] // spread the form entries iterator into an Array
+        .reduce((urlParams, pair) => {
+            // Skip 'File' types, for now, at least. 
+            if (!(pair[1] instanceof File)) {
+                urlParams.append(pair[0], pair[1] as string);
+            }
+            return urlParams;
+        }, new URLSearchParams());
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
     const url = window.location.pathname;
 
-    displayEvents(url);
+    loadEvents(url);
+
+    const formId: any = 'new_event_form';
+    (document.forms[formId] as HTMLFormElement)
+        .addEventListener('submit', onNewEventSubmit);
 });

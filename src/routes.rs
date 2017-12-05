@@ -73,20 +73,6 @@ pub fn counter_json(
     Ok(Json(context))
 }
 
-#[get("/counter/<counter_url>/events")]
-pub fn counter_events_json(
-    counter_url: String,
-    conn: DbConn,
-) -> StdResult<Json<Vec<CounterEvent>>, Result<NotFound<String>>> {
-    // Select the requested Counter
-    let counter = Counter::from_url(&counter_url, &conn).map_err(|_| {
-        Ok(NotFound("Could not find the requested counter!".to_owned()))
-    })?;
-
-    // Read its associated events
-    Ok(Json(counter.events(&conn).map_err(|e| Err(e))?))
-}
-
 #[get("/counter/<counter_url>", rank = 2)]
 pub fn counter(counter_url: String, conn: DbConn) -> StdResult<Template, Result<NotFound<String>>> {
     #[derive(Serialize)]
@@ -115,19 +101,34 @@ pub struct EventForm {
     quantity: i32,
 }
 
-#[post("/counter/<counter_url>", data = "<event>")]
+
+#[get("/counter/<counter_url>/events")]
+pub fn counter_events_json(
+    counter_url: String,
+    conn: DbConn,
+) -> StdResult<Json<Vec<CounterEvent>>, Result<NotFound<String>>> {
+    // Select the requested Counter
+    let counter = Counter::from_url(&counter_url, &conn).map_err(|_| {
+        Ok(NotFound("Could not find the requested counter!".to_owned()))
+    })?;
+
+    // Read its associated events
+    Ok(Json(counter.events(&conn).map_err(|e| Err(e))?))
+}
+
+#[post("/counter/<counter_url>/events", data = "<event>")]
 pub fn counter_new_event(
     counter_url: String,
     event: Form<EventForm>,
     conn: DbConn,
-) -> StdResult<Redirect, Result<NotFound<String>>> {
+) -> StdResult<Json, Result<NotFound<String>>> {
     let counter = Counter::from_url(&counter_url, &conn).map_err(|_| {
         Ok(NotFound("Could not find the requested counter!".to_owned()))
     })?;
 
     counter
         .add_event(event.into_inner().quantity, Utc::now(), &conn)
-        .ok();
+        .map_err(|e| Err(e))?;
 
-    Ok(Redirect::to(&format!("/counter/{}", counter_url)))
+    Ok(Json(json!({ "status": "ok" })))
 }
