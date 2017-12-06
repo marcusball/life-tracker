@@ -71,6 +71,11 @@ class CounterEvent {
 
     /** The timestamp of when this event occurred. */
     public timestamp: string;
+
+    /** Get a nicely formatted string representing @timestamp. */
+    public formattedTimestamp(): string {
+        return new Date(this.timestamp).toLocaleString();
+    }
 }
 
 /**
