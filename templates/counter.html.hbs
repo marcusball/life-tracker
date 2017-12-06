@@ -2,21 +2,35 @@
 <html>
 
     <head>
-        <title>COUNTERS</title>
+        <title>{{counter.name}}</title>
 
         <script src="/static/js/pages/counter.bundle.js"></script>
+        <link rel="stylesheet" href="/static/styles/spectre/spectre.min.css">
+        <link rel="stylesheet" href="/static/styles/spectre/spectre-exp.min.css">
+        <link rel="stylesheet" href="/static/styles/spectre/spectre-icons.min.css">
     </head>
 
     <body>
-        <h1>{{counter.name}}</h1>
+        <div class="container grid-lg">
+            <div class="columns m-2">
+                <div class="col-12">
+                    <h1>{{counter.name}}</h1>
+                </div>
 
-        <div id="events">
-        </div>
+                <div id="events" class="col-12">
+                </div>
+            </div>
 
-        <div id="new_event">
             <form id="new_event_form" method="POST">
-                <input type="number" name="quantity" placeholder="Quantity"></input>
-                <button>Add new event</button>
+                <div class="columns form-group m-2">
+                    <div class="col-3 m-1">
+                        <input type="number" class="form-input" name="quantity" placeholder="Quantity" value=""></input>
+                    </div>
+
+                    <div class="col-3 m-1">
+                        <button class="btn">Add new event</button>
+                    </div>
+                </div>
             </form>
         </div>
     </body>
